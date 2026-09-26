@@ -8,6 +8,232 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
   <link rel="stylesheet" href="style.css">
+
+<style id="mobile-responsive-v24">
+/* MOBILE RESPONSIVE PATCH */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+img, svg, canvas, video {
+  max-width: 100%;
+  height: auto;
+}
+
+section,
+.container,
+.wrap,
+.story-shell,
+.section-inner {
+  min-width: 0;
+}
+
+.viz-card,
+.quad-dashboard,
+.scatter-wrap,
+.interactive-scatter {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+/* TABLET + MOBILE */
+@media (max-width: 900px) {
+
+  nav,
+  .nav,
+  .topbar,
+  .navbar {
+    max-width: 100vw !important;
+  }
+
+  /* Menu tetap muncul */
+  .links {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+
+    flex-wrap: nowrap !important;
+    gap: 18px !important;
+
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+
+    white-space: nowrap !important;
+    max-width: 100% !important;
+
+    padding: 9px 16px 11px !important;
+
+    scroll-snap-type: x proximity;
+  }
+
+  .links::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .links a {
+    display: inline-flex !important;
+    flex: 0 0 auto !important;
+
+    visibility: visible !important;
+    opacity: 1 !important;
+
+    font-size: .68rem !important;
+    line-height: 1 !important;
+    letter-spacing: .07em !important;
+
+    scroll-snap-align: start;
+  }
+
+  /* Navbar boleh menjadi dua baris */
+  .nav-inner,
+  .nav-wrap,
+  .navbar-inner {
+    flex-wrap: wrap !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  /* Police line jangan hilang di HP */
+  .police-line {
+    display: block !important;
+    visibility: visible !important;
+    opacity: .92 !important;
+
+    position: absolute !important;
+
+    width: 68vw !important;
+    max-width: 420px !important;
+    min-width: 235px !important;
+
+    right: -70px !important;
+    top: 72px !important;
+
+    transform: rotate(8deg) !important;
+    transform-origin: center !important;
+
+    pointer-events: none !important;
+    z-index: 2 !important;
+
+    overflow: hidden !important;
+  }
+
+  .police-line::before,
+  .police-line::after {
+    animation-play-state: running !important;
+  }
+
+  .hero,
+  .hero-inner,
+  .hero-content {
+    min-width: 0 !important;
+  }
+
+  .hero h1 {
+    max-width: 88vw !important;
+  }
+}
+
+
+/* HP */
+@media (max-width: 600px) {
+
+  .links {
+    gap: 16px !important;
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  .links a {
+    font-size: .64rem !important;
+  }
+
+  /* Police line lebih kecil */
+  .police-line {
+    display: block !important;
+
+    width: 78vw !important;
+    min-width: 220px !important;
+
+    right: -92px !important;
+    top: 82px !important;
+
+    transform: rotate(10deg) scale(.82) !important;
+  }
+
+  /* Grafik kuadran */
+  .scatter-card-clean {
+    overflow: hidden !important;
+  }
+
+  .scatter-card-clean .scatter-wrap {
+    width: 100% !important;
+    aspect-ratio: 1 / 1 !important;
+    overflow: visible !important;
+  }
+
+  #scatter34 {
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Kotak kuadran jadi satu kolom */
+  .quad-only-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .quad-toolbar.simple {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+  }
+
+  .quad-reset {
+    align-self: flex-end !important;
+  }
+
+  .province-pills {
+    gap: 6px !important;
+  }
+
+  .province-pill {
+    font-size: .68rem !important;
+  }
+
+  /* Hindari teks membuat halaman melebar */
+  h1,
+  h2,
+  h3,
+  p,
+  .lead,
+  .section-lead,
+  .case-note,
+  .identity-strip {
+    overflow-wrap: anywhere;
+  }
+}
+
+
+/* HP sangat kecil */
+@media (max-width: 380px) {
+
+  .police-line {
+    width: 82vw !important;
+    right: -105px !important;
+    top: 88px !important;
+
+    transform: rotate(10deg) scale(.74) !important;
+  }
+
+  .links a {
+    font-size: .61rem !important;
+  }
+}
+</style>
+
 </head>
 <body>
 <!--
@@ -19,7 +245,7 @@
   4. Simpan (Ctrl+S), lalu refresh browser.
 -->
 
-<nav><div class="brand">POLITEKNIK STATISTIKA</b> PENCURIAN / 2024</div><div class="links"><a href="#kasus">Kasus</a><a href="#jejak">Jejak Digital</a><a href="#metode">Metode</a><a href="#validasi">Validasi</a><a href="#wilayah">Wilayah</a><a href="#akhir">Kesimpulan</a></div></nav>
+<nav><div class="brand">POLITEKNIK STATISTIKA</b> STIS</div><div class="links"><a href="#kasus">Kasus</a><a href="#jejak">Jejak Digital</a><a href="#metode">Metode</a><a href="#validasi">Validasi</a><a href="#wilayah">Wilayah</a><a href="#akhir">Kesimpulan</a></div></nav>
 
 <header class="hero"><div class="police-line" aria-hidden="true"><span>GARIS POLISI ◆ DILARANG MELINTAS ◆ GARIS POLISI ◆ DILARANG MELINTAS ◆ GARIS POLISI ◆ DILARANG MELINTAS ◆</span></div><div class="hero-inner">
 <div class="case identity-strip">
@@ -30,7 +256,7 @@
   <span class="identity-nim">22212586</span>
 </div>
 <h1><span class="small">Ada yang terjadi. Tidak semuanya tercatat.</span><span class="main">Jejak yang</span><span class="red">Tak Tercatat</span></h1>
-<p>Indonesia mencatat <strong>115.956 kejadian pencurian</strong> pada 2024. Namun tingkat pelaporan korban pencurian hanya <strong>19,52%</strong>. Penelitian ini mengikuti dua jenis jejak—catatan resmi dan aktivitas pencarian Google—untuk menemukan wilayah yang menunjukkan indikasi <em>underreporting</em> pencurian.</p>
+<p>Indonesia mencatat <strong>115.956 kejadian pencurian</strong> pada 2024. Namun tingkat pelaporan korban pencurian hanya <strong>19,52%</strong>. Penelitian ini mengikuti dua jenis jejak : Official Statistics dan Google Trends untuk menemukan wilayah yang menunjukkan indikasi <em>underreporting</em> pencurian.</p>
 <a class="scroll" href="#kasus">BUKA BERKAS ↓</a>
 </div></header>
 
