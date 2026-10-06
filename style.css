@@ -881,3 +881,5 @@ select,button,input{font-family:var(--font-body)}
  .scatter-card-clean .scatter-wrap{aspect-ratio:1/1!important}
  .quad-instruction span:last-child{display:none!important}
 }
+/* Final thesis result: one influential High GT–Low Official province */
+.finalists.single{grid-template-columns:1fr;max-width:620px}
