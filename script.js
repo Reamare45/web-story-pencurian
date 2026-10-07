@@ -49,15 +49,41 @@ document.getElementById("rankMetric").addEventListener("change",e=>renderBars(e.
  const sx=x=>L+x/maxX*(W-L-R), sy=y=>H-B-y/maxY*(H-T-B);
  function line(x1,y1,x2,y2,stroke,dash=""){let e=document.createElementNS(NS,"line");["x1","y1","x2","y2"].forEach((k,i)=>e.setAttribute(k,[x1,y1,x2,y2][i]));e.setAttribute("stroke",stroke);if(dash)e.setAttribute("stroke-dasharray",dash);svg.appendChild(e)}
  for(let i=0;i<=100;i+=20){line(L,sy(i),W-R,sy(i),"#222b31");line(sx(i),T,sx(i),H-B,"#222b31");}
- line(L,H-B,W-R,H-B,"#69737a");line(L,T,L,H-B,"#69737a");line(sx(MED_GT),T,sx(MED_GT),H-B,"#e9a23b","7 6");line(L,sy(MED_OFF),W-R,sy(MED_OFF),"#e9a23b","7 6");
- const tx=document.createElementNS(NS,"text");tx.setAttribute("x",(L+W-R)/2);tx.setAttribute("y",H-18);tx.setAttribute("fill","#929ba0");tx.setAttribute("text-anchor","middle");tx.textContent="PencurianGT (0–100)";svg.appendChild(tx);
- const ty=document.createElementNS(NS,"text");ty.setAttribute("x",18);ty.setAttribute("y",(T+H-B)/2);ty.setAttribute("fill","#929ba0");ty.setAttribute("text-anchor","middle");ty.setAttribute("transform",`rotate(-90 18 ${(T+H-B)/2})`);ty.textContent="PencurianOfficial";svg.appendChild(ty);
+ 
+ line(L,H-B,W-R,H-B,"#69737a");line(L,T,L,H-B,"#69737a");
+ 
+ // --- PERBAIKAN GARIS MEDIAN ---
+ // Garis Vertikal = Median PencurianGT (pada Sumbu X)
+ line(sx(MED_GT),T,sx(MED_GT),H-B,"#e9a23b","7 6");
+ // Garis Horizontal = Median PencurianOfficial (pada Sumbu Y)
+ line(L,sy(MED_OFF),W-R,sy(MED_OFF),"#e9a23b","7 6");
+ 
+ // --- PERBAIKAN LABEL SUMBU ---
+ const tx=document.createElementNS(NS,"text");
+ tx.setAttribute("x",(L+W-R)/2);tx.setAttribute("y",H-18);
+ tx.setAttribute("fill","#929ba0");tx.setAttribute("text-anchor","middle");
+ tx.textContent="PencurianGT"; // Sumbu X
+ svg.appendChild(tx);
+ 
+ const ty=document.createElementNS(NS,"text");
+ ty.setAttribute("x",18);ty.setAttribute("y",(T+H-B)/2);
+ ty.setAttribute("fill","#929ba0");ty.setAttribute("text-anchor","middle");
+ ty.setAttribute("transform",`rotate(-90 18 ${(T+H-B)/2})`);
+ ty.textContent="PencurianOfficial (0–100)"; // Sumbu Y
+ svg.appendChild(ty);
+
+ // --- PERBAIKAN POSISI TITIK (X = GT, Y = Official) ---
  PROV_DATA.forEach(d=>{
    const c=document.createElementNS(NS,"circle"), hot=d.quadrant==="High GT–Low Official";
-   c.setAttribute("cx",sx(d.gt));c.setAttribute("cy",sy(d.official));c.setAttribute("r",hot?7:5);
+   c.setAttribute("cx",sx(d.gt));          // Sumbu X: PencurianGT
+   c.setAttribute("cy",sy(d.official));    // Sumbu Y: PencurianOfficial
+   c.setAttribute("r",hot?7:5);
    c.setAttribute("fill",hot?"#e33b32":"#6e7c84");c.setAttribute("stroke",hot?"#ff918a":"#9ca6ab");c.setAttribute("stroke-width","1");
    c.style.cursor="pointer";
-   c.addEventListener("mousemove",ev=>{tip.style.display="block";tip.style.left=(ev.offsetX+14)+"px";tip.style.top=(ev.offsetY+8)+"px";tip.innerHTML=`<b>${d.provinceId}</b><br>Official: ${fmt(d.official,"official")}<br>GT: ${fmt(d.gt,"gt")}<br>${d.quadrant}`});
+   c.addEventListener("mousemove",ev=>{
+     tip.style.display="block";tip.style.left=(ev.offsetX+14)+"px";tip.style.top=(ev.offsetY+8)+"px";
+     tip.innerHTML=`<b>${d.provinceId}</b><br>GT: ${fmt(d.gt,"gt")}<br>Official: ${fmt(d.official,"official")}<br>${d.quadrant}`
+   });
    c.addEventListener("mouseleave",()=>tip.style.display="none");svg.appendChild(c);
  });
 })();
