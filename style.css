@@ -881,3 +881,8 @@ select,button,input{font-family:var(--font-body)}
  .scatter-card-clean .scatter-wrap{aspect-ratio:1/1!important}
  .quad-instruction span:last-child{display:none!important}
 }
+/* Revisi web story pemodelan tingkat pencurian */
+nav .links a.active{color:var(--blue)}
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease}
+.reveal.is-visible{opacity:1;transform:translateY(0)}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.reveal{opacity:1;transform:none;transition:none}}
