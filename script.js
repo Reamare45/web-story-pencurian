@@ -1,184 +1,621 @@
 (() => {
-  const links = [...document.querySelectorAll('nav .links a')];
-  const sections = links.map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  "use strict";
 
-  if ('IntersectionObserver' in window) {
-    const observer = new IntersectionObserver(entries => {
+  /* ---------------------------------------------------------
+     1. DATA PENELITIAN
+     --------------------------------------------------------- */
+
+  const dataTren = [
+    { tahun: 2012, pencurian: 46.38, igtPencurian: 68.30, igtKemalingan: 62.31 },
+    { tahun: 2013, pencurian: 45.88, igtPencurian: 67.97, igtKemalingan: 62.03 },
+    { tahun: 2014, pencurian: 43.39, igtPencurian: 54.26, igtKemalingan: 63.96 },
+    { tahun: 2015, pencurian: 41.35, igtPencurian: 53.76, igtKemalingan: 52.35 },
+    { tahun: 2016, pencurian: 42.82, igtPencurian: 54.34, igtKemalingan: 64.27 },
+    { tahun: 2017, pencurian: 37.47, igtPencurian: 46.16, igtKemalingan: 42.58 },
+    { tahun: 2018, pencurian: 33.01, igtPencurian: 39.02, igtKemalingan: 50.66 },
+    { tahun: 2019, pencurian: 27.90, igtPencurian: 29.22, igtKemalingan: 40.67 },
+    { tahun: 2020, pencurian: 25.25, igtPencurian: 34.37, igtKemalingan: 28.64 },
+    { tahun: 2021, pencurian: 23.74, igtPencurian: 39.57, igtKemalingan: 35.19 },
+    { tahun: 2022, pencurian: 32.36, igtPencurian: 50.19, igtKemalingan: 42.70 },
+    { tahun: 2023, pencurian: 47.86, igtPencurian: 59.29, igtKemalingan: 60.85 },
+    { tahun: 2024, pencurian: 41.18, igtPencurian: 53.55, igtKemalingan: 43.79 }
+  ];
+
+  /*
+   * Prediksi model RLB periode 2013–2024.
+   * Nilai ini merupakan angka perhitungan yang dibulatkan.
+   * Cocokkan kembali dengan output predict() final dari R
+   * sebelum digunakan sebagai angka final publikasi.
+   */
+  const dataPrediksi = [
+    { tahun: 2013, aktual: 45.88, prediksi: 46.65 },
+    { tahun: 2014, aktual: 43.39, prediksi: 42.47 },
+    { tahun: 2015, aktual: 41.35, prediksi: 39.60 },
+    { tahun: 2016, aktual: 42.82, prediksi: 44.13 },
+    { tahun: 2017, aktual: 37.47, prediksi: 34.54 },
+    { tahun: 2018, aktual: 33.01, prediksi: 33.73 },
+    { tahun: 2019, aktual: 27.90, prediksi: 27.83 },
+    { tahun: 2020, aktual: 25.25, prediksi: 26.25 },
+    { tahun: 2021, aktual: 23.74, prediksi: 23.84 },
+    { tahun: 2022, aktual: 32.36, prediksi: 33.51 },
+    { tahun: 2023, aktual: 47.86, prediksi: 47.93 },
+    { tahun: 2024, aktual: 41.18, prediksi: 41.73 }
+  ];
+
+  /* ---------------------------------------------------------
+     2. NAVIGASI AKTIF
+     --------------------------------------------------------- */
+
+  const links = [...document.querySelectorAll("nav .links a")];
+
+  const sections = links
+    .map(link => document.querySelector(link.getAttribute("href")))
+    .filter(Boolean);
+
+  if ("IntersectionObserver" in window && sections.length) {
+    const navObserver = new IntersectionObserver(entries => {
       entries.forEach(entry => {
         if (!entry.isIntersecting) return;
-        links.forEach(link => link.classList.toggle('active', link.getAttribute('href') === `#${entry.target.id}`));
+
+        links.forEach(link => {
+          const isActive =
+            link.getAttribute("href") === `#${entry.target.id}`;
+
+          link.classList.toggle("active", isActive);
+
+          if (isActive) {
+            link.setAttribute("aria-current", "location");
+          } else {
+            link.removeAttribute("aria-current");
+          }
+        });
       });
-    }, { rootMargin: '-25% 0px -60% 0px' });
-    sections.forEach(section => observer.observe(section));
-
-    const revealItems = document.querySelectorAll('.method-step, .metric-card, .stat, table.results tr');
-    const revealObserver = new IntersectionObserver(entries => entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('is-visible');
-        revealObserver.unobserve(entry.target);
-      }
-    }), { threshold: 0.08 });
-    revealItems.forEach(item => { item.classList.add('reveal'); revealObserver.observe(item); });
-  }
-
-  // Grafik dibuat dari angka yang sudah tercantum di index.html/hasil skripsi.
-  const style = document.createElement('style');
-  style.textContent = `
-    .research-chart{margin:28px 0 12px;padding:24px;background:#0d1318;border:1px solid #30363d;min-width:0}
-    .research-chart h3{margin:0 0 6px;font-size:1.12rem;color:#e7e2d6}
-    .research-chart .chart-subtitle{margin:0 0 20px;color:#9aa2a8;font-size:.88rem}
-    .chart-bars{display:grid;gap:17px}
-    .chart-row{display:grid;grid-template-columns:minmax(105px,155px) minmax(0,1fr) 82px;gap:12px;align-items:center}
-    .chart-label{font-size:.88rem;color:#d5d8d9;overflow-wrap:anywhere}
-    .chart-track{height:19px;background:#252b30;position:relative;overflow:hidden}
-    .chart-fill{height:100%;width:0;transition:width .8s ease;background:#55a6b8}
-    .chart-fill.negative{background:#e9a23b}
-    .chart-value{text-align:right;font:700 .86rem 'Courier New',monospace;color:#e7e2d6}
-    .chart-zero{font-size:.76rem;color:#9aa2a8;margin-top:12px}
-    .sus-chart-layout{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
-    .sus-donut{width:150px;height:150px;border-radius:50%;background:conic-gradient(#55a6b8 0 80%,#e9a23b 80% 100%);display:grid;place-items:center;flex:none;position:relative}
-    .sus-donut:before{content:"";position:absolute;inset:18px;border-radius:50%;background:#0d1318}
-    .sus-donut span{position:relative;z-index:1;font:900 1.8rem 'Arial Black',sans-serif;color:#e7e2d6}
-    .sus-legend{display:grid;gap:12px;flex:1;min-width:180px}
-    .sus-legend div{display:flex;align-items:flex-start;gap:10px;color:#d5d8d9}
-    .sus-key{width:11px;height:11px;margin-top:6px;flex:none}
-    .sus-key.blue{background:#55a6b8}.sus-key.amber{background:#e9a23b}
-    .chart-caveat{color:#9aa2a8;font-size:.8rem;margin:18px 0 0}
-    @media(max-width:600px){.research-chart{padding:17px}.chart-row{grid-template-columns:90px minmax(0,1fr) 68px;gap:8px}.chart-label,.chart-value{font-size:.76rem}.sus-donut{width:125px;height:125px}}
-    @media(prefers-reduced-motion:reduce){.chart-fill{transition:none}}
-  `;
-  document.head.appendChild(style);
-
-  function addChart(parent, title, subtitle, rows, options = {}) {
-    if (!parent || parent.querySelector(`[data-chart-title="${title}"]`)) return;
-    const card = document.createElement('div');
-    card.className = 'research-chart';
-    card.dataset.chartTitle = title;
-
-    const heading = document.createElement('h3');
-    heading.textContent = title;
-
-    const sub = document.createElement('p');
-    sub.className = 'chart-subtitle';
-    sub.textContent = subtitle;
-
-    const bars = document.createElement('div');
-    bars.className = 'chart-bars';
-
-    const maxAbs = Math.max(...rows.map(r => Math.abs(r.value)), 1);
-
-    rows.forEach(row => {
-      const line = document.createElement('div');
-      line.className = 'chart-row';
-
-      const label = document.createElement('div');
-      label.className = 'chart-label';
-      label.textContent = row.label;
-
-      const track = document.createElement('div');
-      track.className = 'chart-track';
-
-      const fill = document.createElement('div');
-      fill.className = 'chart-fill' + (row.value < 0 ? ' negative' : '');
-      fill.style.width = `${Math.max(2, Math.abs(row.value) / maxAbs * 100)}%`;
-      track.appendChild(fill);
-
-      const value = document.createElement('div');
-      value.className = 'chart-value';
-      value.textContent = row.display;
-
-      line.append(label, track, value);
-      bars.appendChild(line);
+    }, {
+      rootMargin: "-20% 0px -65% 0px",
+      threshold: 0
     });
 
-    card.append(heading, sub, bars);
-
-    if (options.note) {
-      const note = document.createElement('p');
-      note.className = 'chart-caveat';
-      note.textContent = options.note;
-      card.appendChild(note);
-    }
-
-    parent.appendChild(card);
+    sections.forEach(section => navObserver.observe(section));
   }
 
-  // 1. Grafik korelasi Pearson.
-  const pola = document.querySelector('#pola .metric-grid');
+  /* ---------------------------------------------------------
+     3. STYLE GRAFIK
+     --------------------------------------------------------- */
 
-  addChart(
-    pola?.parentElement,
-    'Perbandingan korelasi Pearson',
-    'Korelasi setiap indeks Google Trends dengan tingkat pencurian (r Pearson).',
-    [
-      { label: 'IGT “pencurian”', value: 0.8940, display: '0,8940' },
-      { label: 'IGT “kemalingan”', value: 0.8846, display: '0,8846' }
-    ],
-    {
-      note: 'Kedua koefisien menunjukkan hubungan positif yang sangat kuat. Korelasi tidak membuktikan sebab-akibat.'
+  const style = document.createElement("style");
+
+  style.textContent = `
+    .research-chart {
+      background: #0d1318;
+      border: 1px solid var(--line, #30363d);
+      padding: clamp(14px, 3vw, 24px);
+      margin: 24px 0;
+      min-width: 0;
     }
+
+    .research-chart h3 {
+      margin: 0 0 8px;
+      font-size: 1.1rem;
+      line-height: 1.5;
+    }
+
+    .research-chart .chart-description {
+      color: var(--muted, #9aa4ad);
+      font-size: .9rem;
+      line-height: 1.7;
+      margin: 0 0 18px;
+    }
+
+    .research-chart .chart-scroll {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .research-chart svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      min-width: 480px;
+      overflow: visible;
+    }
+
+    .research-chart .chart-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 20px;
+      margin-top: 16px;
+      color: #d5d8d9;
+      font-size: .85rem;
+    }
+
+    .research-chart .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .research-chart .legend-line {
+      width: 24px;
+      height: 3px;
+      display: inline-block;
+      border-radius: 4px;
+    }
+
+    .research-chart .chart-source {
+      color: var(--muted, #9aa4ad);
+      font-size: .8rem;
+      line-height: 1.6;
+      margin: 16px 0 0;
+    }
+
+    .research-chart .chart-insight {
+      background: #121b21;
+      border-left: 3px solid var(--blue, #55a6b8);
+      padding: 12px 14px;
+      margin-top: 16px;
+      color: #d5d8d9;
+      font-size: .9rem;
+      line-height: 1.7;
+    }
+
+    .research-chart .chart-insight strong {
+      color: #fff;
+    }
+
+    .research-chart .chart-tooltip {
+      margin-top: 10px;
+      min-height: 1.5em;
+      color: #d5d8d9;
+      font-size: .85rem;
+    }
+
+    .research-chart .chart-point {
+      cursor: crosshair;
+      outline: none;
+    }
+
+    .research-chart .chart-point:focus circle,
+    .research-chart .chart-point:hover circle {
+      stroke: #fff;
+      stroke-width: 3;
+      r: 6;
+    }
+
+    @media (max-width: 600px) {
+      .research-chart {
+        padding: 14px;
+      }
+
+      .research-chart svg {
+        min-width: 460px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .reveal,
+      .research-chart * {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  `;
+
+  document.head.appendChild(style);
+
+  /* ---------------------------------------------------------
+     4. FUNGSI FORMAT ANGKA
+     --------------------------------------------------------- */
+
+  const formatAngka = (angka, desimal = 2) =>
+    Number(angka).toLocaleString("id-ID", {
+      minimumFractionDigits: desimal,
+      maximumFractionDigits: desimal
+    });
+
+  /* ---------------------------------------------------------
+     5. FUNGSI PEMBUAT GRAFIK GARIS SVG
+     --------------------------------------------------------- */
+
+  function buatGrafikGaris({
+    id,
+    judul,
+    deskripsi,
+    data,
+    series,
+    minY = 0,
+    maxY = 100,
+    intervalY = 10,
+    labelY,
+    insight,
+    sumber
+  }) {
+    const lebar = 760;
+    const tinggi = 350;
+
+    const margin = {
+      atas: 24,
+      kanan: 24,
+      bawah: 56,
+      kiri: 64
+    };
+
+    const plotWidth = lebar - margin.kiri - margin.kanan;
+    const plotHeight = tinggi - margin.atas - margin.bawah;
+
+    const x = index =>
+      margin.kiri + (index / (data.length - 1)) * plotWidth;
+
+    const y = nilai =>
+      margin.atas +
+      ((maxY - nilai) / (maxY - minY)) * plotHeight;
+
+    const svgNS = "http://www.w3.org/2000/svg";
+    const el = (tag, attrs = {}, isi = "") => {
+      const node = document.createElementNS(svgNS, tag);
+
+      Object.entries(attrs).forEach(([key, value]) => {
+        node.setAttribute(key, String(value));
+      });
+
+      if (isi !== "") node.textContent = isi;
+
+      return node;
+    };
+
+    const svg = el("svg", {
+      viewBox: `0 0 ${lebar} ${tinggi}`,
+      role: "img",
+      "aria-labelledby": `${id}-title ${id}-desc`
+    });
+
+    svg.append(
+      el("title", { id: `${id}-title` }, judul),
+      el("desc", { id: `${id}-desc` }, deskripsi)
+    );
+
+    /* Garis bantu dan label sumbu Y */
+    for (let nilai = minY; nilai <= maxY + 0.0001; nilai += intervalY) {
+      const posisiY = y(nilai);
+
+      svg.append(
+        el("line", {
+          x1: margin.kiri,
+          y1: posisiY,
+          x2: lebar - margin.kanan,
+          y2: posisiY,
+          stroke: "#30363d",
+          "stroke-width": 1
+        }),
+        el("text", {
+          x: margin.kiri - 10,
+          y: posisiY + 4,
+          fill: "#9aa4ad",
+          "font-size": 12,
+          "text-anchor": "end"
+        }, formatAngka(nilai, 0))
+      );
+    }
+
+    /* Garis sumbu */
+    svg.append(
+      el("line", {
+        x1: margin.kiri,
+        y1: margin.atas,
+        x2: margin.kiri,
+        y2: tinggi - margin.bawah,
+        stroke: "#64707a",
+        "stroke-width": 1
+      }),
+      el("line", {
+        x1: margin.kiri,
+        y1: tinggi - margin.bawah,
+        x2: lebar - margin.kanan,
+        y2: tinggi - margin.bawah,
+        stroke: "#64707a",
+        "stroke-width": 1
+      })
+    );
+
+    /* Label tahun */
+    data.forEach((item, index) => {
+      svg.append(
+        el("text", {
+          x: x(index),
+          y: tinggi - margin.bawah + 22,
+          fill: "#9aa4ad",
+          "font-size": 11,
+          "text-anchor": "middle"
+        }, String(item.tahun))
+      );
+    });
+
+    /* Label sumbu Y */
+    svg.append(
+      el("text", {
+        x: 17,
+        y: tinggi / 2,
+        fill: "#d5d8d9",
+        "font-size": 12,
+        "text-anchor": "middle",
+        transform: `rotate(-90 17 ${tinggi / 2})`
+      }, labelY)
+    );
+
+    /* Seri garis, titik, dan tooltip */
+    series.forEach(seri => {
+      const titik = data.map((item, index) => ({
+        x: x(index),
+        y: y(item[seri.key]),
+        tahun: item.tahun,
+        nilai: item[seri.key]
+      }));
+
+      const garis = titik
+        .map((point, index) =>
+          `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`
+        )
+        .join(" ");
+
+      svg.append(
+        el("path", {
+          d: garis,
+          fill: "none",
+          stroke: seri.warna,
+          "stroke-width": 3,
+          "stroke-linejoin": "round",
+          "stroke-linecap": "round"
+        })
+      );
+
+      titik.forEach(point => {
+        const group = el("g", {
+          class: "chart-point",
+          tabindex: 0,
+          role: "img",
+          "aria-label":
+            `${seri.label}, tahun ${point.tahun}: ${formatAngka(point.nilai)}`
+        });
+
+        group.append(
+          el("circle", {
+            cx: point.x,
+            cy: point.y,
+            r: 3.5,
+            fill: seri.warna,
+            stroke: "#0d1318",
+            "stroke-width": 1.5
+          }),
+          el("title", {},
+            `${point.tahun}: ${formatAngka(point.nilai)}`
+          )
+        );
+
+        svg.appendChild(group);
+      });
+    });
+
+    const card = document.createElement("article");
+    card.className = "research-chart";
+    card.id = id;
+
+    const heading = document.createElement("h3");
+    heading.textContent = judul;
+
+    const paragraph = document.createElement("p");
+    paragraph.className = "chart-description";
+    paragraph.textContent = deskripsi;
+
+    const chartScroll = document.createElement("div");
+    chartScroll.className = "chart-scroll";
+    chartScroll.appendChild(svg);
+
+    const legend = document.createElement("div");
+    legend.className = "chart-legend";
+    legend.setAttribute("aria-label", "Legenda grafik");
+
+    series.forEach(seri => {
+      const item = document.createElement("span");
+      item.className = "legend-item";
+
+      const swatch = document.createElement("span");
+      swatch.className = "legend-line";
+      swatch.style.backgroundColor = seri.warna;
+
+      const label = document.createElement("span");
+      label.textContent = seri.label;
+
+      item.append(swatch, label);
+      legend.appendChild(item);
+    });
+
+    const keterangan = document.createElement("p");
+    keterangan.className = "chart-source";
+    keterangan.textContent = sumber;
+
+    card.append(heading, paragraph, chartScroll, legend);
+
+    if (insight) {
+      const insightBox = document.createElement("div");
+      insightBox.className = "chart-insight";
+      insightBox.textContent = insight;
+      card.appendChild(insightBox);
+    }
+
+    card.appendChild(keterangan);
+
+    return card;
+  }
+
+  /* ---------------------------------------------------------
+     6. MASUKKAN GRAFIK TREN KE BAGIAN #POLA
+     --------------------------------------------------------- */
+
+  const polaTarget = document.querySelector("#pola .wrap");
+
+  if (polaTarget && !document.getElementById("grafik-tren-pencurian")) {
+    const grafikPencurian = buatGrafikGaris({
+      id: "grafik-tren-pencurian",
+      judul: "Perkembangan tingkat pencurian di Indonesia",
+      deskripsi:
+        "Tingkat pencurian per 100.000 penduduk selama 2012–2024.",
+      data: dataTren,
+      series: [
+        {
+          key: "pencurian",
+          label: "Tingkat pencurian",
+          warna: "#55a6b8"
+        }
+      ],
+      minY: 0,
+      maxY: 50,
+      intervalY: 10,
+      labelY: "Kejadian per 100.000 penduduk",
+      insight:
+        "Tingkat pencurian mencapai titik terendah pada 2021 sebesar 23,74, meningkat menjadi 47,86 pada 2023, lalu turun menjadi 41,18 pada 2024.",
+      sumber: "Sumber: data penelitian, diolah."
+    });
+
+    const grafikIGTPencurian = buatGrafikGaris({
+      id: "grafik-igt-pencurian",
+      judul: "Perkembangan IGT kata kunci “pencurian”",
+      deskripsi:
+        "Indeks Google Trends kata kunci “pencurian” di Indonesia, 2012–2024.",
+      data: dataTren,
+      series: [
+        {
+          key: "igtPencurian",
+          label: "IGT pencurian",
+          warna: "#55a6b8"
+        }
+      ],
+      minY: 0,
+      maxY: 100,
+      intervalY: 20,
+      labelY: "Indeks Google Trends",
+      insight:
+        "IGT “pencurian” mencapai nilai terendah pada 2019 sebesar 29,22, meningkat hingga 59,29 pada 2023, kemudian turun menjadi 53,55 pada 2024.",
+      sumber: "Sumber: Google Trends, diolah."
+    });
+
+    const grafikIGTKemalingan = buatGrafikGaris({
+      id: "grafik-igt-kemalingan",
+      judul: "Perkembangan IGT kata kunci “kemalingan”",
+      deskripsi:
+        "Indeks Google Trends kata kunci “kemalingan” di Indonesia, 2012–2024.",
+      data: dataTren,
+      series: [
+        {
+          key: "igtKemalingan",
+          label: "IGT kemalingan",
+          warna: "#e9a23b"
+        }
+      ],
+      minY: 0,
+      maxY: 100,
+      intervalY: 20,
+      labelY: "Indeks Google Trends",
+      insight:
+        "IGT “kemalingan” mencapai nilai tertinggi pada 2016 sebesar 64,27, turun ke titik terendah pada 2020 sebesar 28,64, dan meningkat menjadi 60,85 pada 2023.",
+      sumber: "Sumber: Google Trends, diolah."
+    });
+
+    /*
+     * Grafik dimasukkan setelah pengantar bagian #pola,
+     * sebelum kartu korelasi agar alur baca dimulai dari tren.
+     */
+    const metricGrid = polaTarget.querySelector(".metric-grid");
+
+    if (metricGrid) {
+      polaTarget.insertBefore(grafikIGTKemalingan, metricGrid);
+      polaTarget.insertBefore(grafikIGTPencurian, grafikIGTKemalingan);
+      polaTarget.insertBefore(grafikPencurian, grafikIGTPencurian);
+    } else {
+      polaTarget.append(
+        grafikPencurian,
+        grafikIGTPencurian,
+        grafikIGTKemalingan
+      );
+    }
+  }
+
+  /* ---------------------------------------------------------
+     7. GRAFIK AKTUAL VS PREDIKSI PADA BAGIAN #HASIL
+     --------------------------------------------------------- */
+
+  const hasilTarget = document.querySelector("#hasil .wrap");
+
+  if (hasilTarget && !document.getElementById("grafik-aktual-prediksi")) {
+    const grafikAktualPrediksi = buatGrafikGaris({
+      id: "grafik-aktual-prediksi",
+      judul: "Perbandingan tingkat pencurian aktual dan prediksi",
+      deskripsi:
+        "Perbandingan tingkat pencurian aktual dengan hasil estimasi model RLB pada 2013–2024. Tahun 2012 tidak disertakan karena diferensiasi pertama variabel kemiskinan mengurangi satu pengamatan.",
+      data: dataPrediksi,
+      series: [
+        {
+          key: "aktual",
+          label: "Aktual",
+          warna: "#55a6b8"
+        },
+        {
+          key: "prediksi",
+          label: "Prediksi model RLB",
+          warna: "#e9a23b"
+        }
+      ],
+      minY: 0,
+      maxY: 50,
+      intervalY: 10,
+      labelY: "Kejadian per 100.000 penduduk",
+      insight:
+        "Grafik digunakan untuk melihat kedekatan pola hasil estimasi dengan data aktual. Nilai prediksi yang ditampilkan perlu dicocokkan dengan output predict() dari model final di R.",
+      sumber:
+        "Sumber: data penelitian dan hasil estimasi model RLB. Nilai prediksi ditampilkan dengan pembulatan dua desimal."
+    });
+
+    /*
+     * Tempatkan setelah persamaan dan ringkasan hasil model.
+     * Jika tidak ada elemen .equation, letakkan sebelum tabel hasil.
+     */
+    const equation = hasilTarget.querySelector(".equation");
+    const stats = hasilTarget.querySelector(".stats");
+    const resultsTable = hasilTarget.querySelector(".table-wrap");
+
+    if (stats) {
+      stats.insertAdjacentElement("afterend", grafikAktualPrediksi);
+    } else if (equation) {
+      equation.insertAdjacentElement("afterend", grafikAktualPrediksi);
+    } else if (resultsTable) {
+      hasilTarget.insertBefore(grafikAktualPrediksi, resultsTable);
+    } else {
+      hasilTarget.appendChild(grafikAktualPrediksi);
+    }
+  }
+
+  /* ---------------------------------------------------------
+     8. ANIMASI ELEMEN SAAT MASUK KE AREA PANDANG
+     --------------------------------------------------------- */
+
+  const revealItems = document.querySelectorAll(
+    ".method-step, .metric-card, .stat, table.results tr, .research-chart"
   );
 
-  // 2. Grafik koefisien regresi linear berganda.
-  const hasil = document.querySelector('#hasil .table-wrap');
+  if ("IntersectionObserver" in window) {
+    const revealObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
 
-  addChart(
-    hasil,
-    'Koefisien regresi linear berganda',
-    'Nilai koefisien sesuai tabel hasil model. Panjang batang menunjukkan besar koefisien absolut; warna jingga menandai koefisien negatif.',
-    [
-      { label: 'IGT “pencurian”', value: 0.49046, display: '+0,49046' },
-      { label: 'IGT “kemalingan”', value: 0.30382, display: '+0,30382' },
-      { label: 'TPT', value: -7.47588, display: '−7,47588' },
-      { label: 'Δ Persentase miskin', value: 5.72938, display: '+5,72938' }
-    ],
-    {
-      note: 'Skala batang memakai nilai absolut karena koefisien memiliki satuan dan rentang yang berbeda. Interpretasikan arah dari tanda koefisien, bukan dari panjang batang saja.'
-    }
-  );
+        entry.target.classList.add("is-visible");
+        revealObserver.unobserve(entry.target);
+      });
+    }, {
+      threshold: 0.08
+    });
 
-  // 3. Diagram donat hasil evaluasi SUS.
-  const evalGrid = document.querySelector('#evaluasi .metric-grid');
-
-  if (evalGrid && !evalGrid.querySelector('[data-sus-chart]')) {
-    const card = document.createElement('div');
-    card.className = 'research-chart';
-    card.dataset.susChart = 'true';
-
-    const title = document.createElement('h3');
-    title.textContent = 'Sebaran kategori skor SUS';
-
-    const subtitle = document.createElement('p');
-    subtitle.className = 'chart-subtitle';
-    subtitle.textContent = 'Proporsi responden berdasarkan ambang skor 68 dari 30 responden.';
-
-    const layout = document.createElement('div');
-    layout.className = 'sus-chart-layout';
-
-    const donut = document.createElement('div');
-    donut.className = 'sus-donut';
-    donut.setAttribute('role', 'img');
-    donut.setAttribute('aria-label', '80 persen responden memperoleh skor SUS minimal 68');
-
-    const donutText = document.createElement('span');
-    donutText.textContent = '80%';
-    donut.appendChild(donutText);
-
-    const legend = document.createElement('div');
-    legend.className = 'sus-legend';
-    legend.innerHTML = `
-      <div>
-        <span class="sus-key blue"></span>
-        <span><b>24 responden (80%)</b><br>Skor SUS ≥ 68</span>
-      </div>
-      <div>
-        <span class="sus-key amber"></span>
-        <span><b>6 responden (20%)</b><br>Skor SUS &lt; 68</span>
-      </div>
-    `;
-
-    layout.append(donut, legend);
-    card.append(title, subtitle, layout);
-    evalGrid.appendChild(card);
+    revealItems.forEach(item => {
+      item.classList.add("reveal");
+      revealObserver.observe(item);
+    });
   }
 })();
