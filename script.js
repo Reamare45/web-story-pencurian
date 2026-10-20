@@ -15,7 +15,7 @@
     { tahun: 2021, pencurian: 23.74, igtPencurian: 39.57, igtKemalingan: 35.19 },
     { tahun: 2022, pencurian: 32.36, igtPencurian: 50.19, igtKemalingan: 42.70 },
     { tahun: 2023, pencurian: 47.86, igtPencurian: 59.29, igtKemalingan: 60.85 },
-    { tahun: 2024, pencurian: 41.17, igtPencurian: 53.55, igtKemalingan: 43.79 }
+    { tahun: 2024, pencurian: 41.18, igtPencurian: 53.55, igtKemalingan: 43.79 }
   ];
 
   const dataPrediksi = [
@@ -30,7 +30,7 @@
     { tahun: 2021, aktual: 23.74, prediksi: 23.84 },
     { tahun: 2022, aktual: 32.36, prediksi: 33.51 },
     { tahun: 2023, aktual: 47.86, prediksi: 47.93 },
-    { tahun: 2024, aktual: 41.17, prediksi: 41.73 }
+    { tahun: 2024, aktual: 41.18, prediksi: 41.73 }
   ];
 
   const links = [...document.querySelectorAll("nav .links a")];
