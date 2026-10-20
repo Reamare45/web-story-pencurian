@@ -1,9 +1,6 @@
+
 (() => {
   "use strict";
-
-  /* ---------------------------------------------------------
-     1. DATA PENELITIAN
-     --------------------------------------------------------- */
 
   const dataTren = [
     { tahun: 2012, pencurian: 46.38, igtPencurian: 68.30, igtKemalingan: 62.31 },
@@ -18,15 +15,9 @@
     { tahun: 2021, pencurian: 23.74, igtPencurian: 39.57, igtKemalingan: 35.19 },
     { tahun: 2022, pencurian: 32.36, igtPencurian: 50.19, igtKemalingan: 42.70 },
     { tahun: 2023, pencurian: 47.86, igtPencurian: 59.29, igtKemalingan: 60.85 },
-    { tahun: 2024, pencurian: 41.18, igtPencurian: 53.55, igtKemalingan: 43.79 }
+    { tahun: 2024, pencurian: 41.17, igtPencurian: 53.55, igtKemalingan: 43.79 }
   ];
 
-  /*
-   * Prediksi model RLB periode 2013–2024.
-   * Nilai ini merupakan angka perhitungan yang dibulatkan.
-   * Cocokkan kembali dengan output predict() final dari R
-   * sebelum digunakan sebagai angka final publikasi.
-   */
   const dataPrediksi = [
     { tahun: 2013, aktual: 45.88, prediksi: 46.65 },
     { tahun: 2014, aktual: 43.39, prediksi: 42.47 },
@@ -39,12 +30,8 @@
     { tahun: 2021, aktual: 23.74, prediksi: 23.84 },
     { tahun: 2022, aktual: 32.36, prediksi: 33.51 },
     { tahun: 2023, aktual: 47.86, prediksi: 47.93 },
-    { tahun: 2024, aktual: 41.18, prediksi: 41.73 }
+    { tahun: 2024, aktual: 41.17, prediksi: 41.73 }
   ];
-
-  /* ---------------------------------------------------------
-     2. NAVIGASI AKTIF
-     --------------------------------------------------------- */
 
   const links = [...document.querySelectorAll("nav .links a")];
 
@@ -77,10 +64,6 @@
 
     sections.forEach(section => navObserver.observe(section));
   }
-
-  /* ---------------------------------------------------------
-     3. STYLE GRAFIK
-     --------------------------------------------------------- */
 
   const style = document.createElement("style");
 
@@ -149,27 +132,6 @@
       margin: 16px 0 0;
     }
 
-    .research-chart .chart-insight {
-      background: #121b21;
-      border-left: 3px solid var(--blue, #55a6b8);
-      padding: 12px 14px;
-      margin-top: 16px;
-      color: #d5d8d9;
-      font-size: .9rem;
-      line-height: 1.7;
-    }
-
-    .research-chart .chart-insight strong {
-      color: #fff;
-    }
-
-    .research-chart .chart-tooltip {
-      margin-top: 10px;
-      min-height: 1.5em;
-      color: #d5d8d9;
-      font-size: .85rem;
-    }
-
     .research-chart .chart-point {
       cursor: crosshair;
       outline: none;
@@ -203,19 +165,11 @@
 
   document.head.appendChild(style);
 
-  /* ---------------------------------------------------------
-     4. FUNGSI FORMAT ANGKA
-     --------------------------------------------------------- */
-
   const formatAngka = (angka, desimal = 2) =>
     Number(angka).toLocaleString("id-ID", {
       minimumFractionDigits: desimal,
       maximumFractionDigits: desimal
     });
-
-  /* ---------------------------------------------------------
-     5. FUNGSI PEMBUAT GRAFIK GARIS SVG
-     --------------------------------------------------------- */
 
   function buatGrafikGaris({
     id,
@@ -227,7 +181,6 @@
     maxY = 100,
     intervalY = 10,
     labelY,
-    insight,
     sumber
   }) {
     const lebar = 760;
@@ -251,6 +204,7 @@
       ((maxY - nilai) / (maxY - minY)) * plotHeight;
 
     const svgNS = "http://www.w3.org/2000/svg";
+
     const el = (tag, attrs = {}, isi = "") => {
       const node = document.createElementNS(svgNS, tag);
 
@@ -274,8 +228,11 @@
       el("desc", { id: `${id}-desc` }, deskripsi)
     );
 
-    /* Garis bantu dan label sumbu Y */
-    for (let nilai = minY; nilai <= maxY + 0.0001; nilai += intervalY) {
+    for (
+      let nilai = minY;
+      nilai <= maxY + 0.0001;
+      nilai += intervalY
+    ) {
       const posisiY = y(nilai);
 
       svg.append(
@@ -297,7 +254,6 @@
       );
     }
 
-    /* Garis sumbu */
     svg.append(
       el("line", {
         x1: margin.kiri,
@@ -317,7 +273,6 @@
       })
     );
 
-    /* Label tahun */
     data.forEach((item, index) => {
       svg.append(
         el("text", {
@@ -330,7 +285,6 @@
       );
     });
 
-    /* Label sumbu Y */
     svg.append(
       el("text", {
         x: 17,
@@ -342,7 +296,6 @@
       }, labelY)
     );
 
-    /* Seri garis, titik, dan tooltip */
     series.forEach(seri => {
       const titik = data.map((item, index) => ({
         x: x(index),
@@ -433,27 +386,17 @@
     keterangan.className = "chart-source";
     keterangan.textContent = sumber;
 
-    card.append(heading, paragraph, chartScroll, legend);
-
-    if (insight) {
-      const insightBox = document.createElement("div");
-      insightBox.className = "chart-insight";
-      insightBox.textContent = insight;
-      card.appendChild(insightBox);
-    }
-
-    card.appendChild(keterangan);
+    card.append(heading, paragraph, chartScroll, legend, keterangan);
 
     return card;
   }
 
-  /* ---------------------------------------------------------
-     6. MASUKKAN GRAFIK TREN KE BAGIAN #POLA
-     --------------------------------------------------------- */
-
   const polaTarget = document.querySelector("#pola .wrap");
 
-  if (polaTarget && !document.getElementById("grafik-tren-pencurian")) {
+  if (
+    polaTarget &&
+    !document.getElementById("grafik-tren-pencurian")
+  ) {
     const grafikPencurian = buatGrafikGaris({
       id: "grafik-tren-pencurian",
       judul: "Perkembangan tingkat pencurian di Indonesia",
@@ -471,8 +414,6 @@
       maxY: 50,
       intervalY: 10,
       labelY: "Kejadian per 100.000 penduduk",
-      insight:
-        "Tingkat pencurian mencapai titik terendah pada 2021 sebesar 23,74, meningkat menjadi 47,86 pada 2023, lalu turun menjadi 41,18 pada 2024.",
       sumber: "Sumber: data penelitian, diolah."
     });
 
@@ -493,8 +434,6 @@
       maxY: 100,
       intervalY: 20,
       labelY: "Indeks Google Trends",
-      insight:
-        "IGT “pencurian” mencapai nilai terendah pada 2019 sebesar 29,22, meningkat hingga 59,29 pada 2023, kemudian turun menjadi 53,55 pada 2024.",
       sumber: "Sumber: Google Trends, diolah."
     });
 
@@ -515,15 +454,9 @@
       maxY: 100,
       intervalY: 20,
       labelY: "Indeks Google Trends",
-      insight:
-        "IGT “kemalingan” mencapai nilai tertinggi pada 2016 sebesar 64,27, turun ke titik terendah pada 2020 sebesar 28,64, dan meningkat menjadi 60,85 pada 2023.",
       sumber: "Sumber: Google Trends, diolah."
     });
 
-    /*
-     * Grafik dimasukkan setelah pengantar bagian #pola,
-     * sebelum kartu korelasi agar alur baca dimulai dari tren.
-     */
     const metricGrid = polaTarget.querySelector(".metric-grid");
 
     if (metricGrid) {
@@ -539,13 +472,12 @@
     }
   }
 
-  /* ---------------------------------------------------------
-     7. GRAFIK AKTUAL VS PREDIKSI PADA BAGIAN #HASIL
-     --------------------------------------------------------- */
-
   const hasilTarget = document.querySelector("#hasil .wrap");
 
-  if (hasilTarget && !document.getElementById("grafik-aktual-prediksi")) {
+  if (
+    hasilTarget &&
+    !document.getElementById("grafik-aktual-prediksi")
+  ) {
     const grafikAktualPrediksi = buatGrafikGaris({
       id: "grafik-aktual-prediksi",
       judul: "Perbandingan tingkat pencurian aktual dan prediksi",
@@ -568,16 +500,10 @@
       maxY: 50,
       intervalY: 10,
       labelY: "Kejadian per 100.000 penduduk",
-      insight:
-        "Grafik digunakan untuk melihat kedekatan pola hasil estimasi dengan data aktual. Nilai prediksi yang ditampilkan perlu dicocokkan dengan output predict() dari model final di R.",
       sumber:
         "Sumber: data penelitian dan hasil estimasi model RLB. Nilai prediksi ditampilkan dengan pembulatan dua desimal."
     });
 
-    /*
-     * Tempatkan setelah persamaan dan ringkasan hasil model.
-     * Jika tidak ada elemen .equation, letakkan sebelum tabel hasil.
-     */
     const equation = hasilTarget.querySelector(".equation");
     const stats = hasilTarget.querySelector(".stats");
     const resultsTable = hasilTarget.querySelector(".table-wrap");
@@ -592,10 +518,6 @@
       hasilTarget.appendChild(grafikAktualPrediksi);
     }
   }
-
-  /* ---------------------------------------------------------
-     8. ANIMASI ELEMEN SAAT MASUK KE AREA PANDANG
-     --------------------------------------------------------- */
 
   const revealItems = document.querySelectorAll(
     ".method-step, .metric-card, .stat, table.results tr, .research-chart"
